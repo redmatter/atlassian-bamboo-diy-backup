@@ -8,7 +8,7 @@ function bamboo_backup_archive {
         bail "In order to encrypt the backup you must set the 'BAMBOO_BACKUP_GPG_RECIPIENT' configuration variable. Exiting..."
     fi
     mkdir -p ${BAMBOO_BACKUP_ARCHIVE_ROOT}
-    BAMBOO_BACKUP_ARCHIVE_NAME=`perl -we 'use Time::Piece; my $sydTime = localtime; print "bamboo-", $sydTime->strftime("%Y%m%d-%H%M%S-"), substr($sydTime->epoch, -3), ".tar.gz.gpg"'`
+    BAMBOO_BACKUP_ARCHIVE_NAME=$(perl -we 'use Time::Piece; my $sydTime = localtime; print "bamboo-", $sydTime->strftime("%Y%m%d-%H%M%S-"), substr($sydTime->epoch, -3), ".tar.gz.gpg"')
 
     info "Archiving ${BAMBOO_BACKUP_ROOT} into ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME}"
     info "Encrypting for ${BAMBOO_BACKUP_GPG_RECIPIENT}"

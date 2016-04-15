@@ -84,7 +84,7 @@ mkdir -p ${BAMBOO_HOME}
 chown ${BAMBOO_UID}:${BAMBOO_GID} ${BAMBOO_HOME}
 
 # Setup restore paths
-BAMBOO_RESTORE_ROOT=`mktemp -d /tmp/bamboo.diy-restore.XXXXXX`
+BAMBOO_RESTORE_ROOT=$(mktemp -d /tmp/bamboo.diy-restore.XXXXXX)
 BAMBOO_RESTORE_DB=${BAMBOO_RESTORE_ROOT}/bamboo-db
 BAMBOO_RESTORE_HOME=${BAMBOO_RESTORE_ROOT}/bamboo-home
 

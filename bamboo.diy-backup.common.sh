@@ -9,12 +9,12 @@ BAMBOO_HTTP_AUTH="-u ${BAMBOO_BACKUP_USER}:${BAMBOO_BACKUP_PASS}"
 PRODUCT=Bamboo
 
 function bamboo_lock {
-    BAMBOO_LOCK_RESULT=`curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -X POST -H "Content-type: application/json" "${BAMBOO_URL}/mvc/maintenance/lock"`
+    BAMBOO_LOCK_RESULT=$(curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -X POST -H "Content-type: application/json" "${BAMBOO_URL}/mvc/maintenance/lock")
     if [ -z "${BAMBOO_LOCK_RESULT}" ]; then
         bail "Locking this ${PRODUCT} instance failed"
     fi
 
-    BAMBOO_LOCK_TOKEN=`echo ${BAMBOO_LOCK_RESULT} | jq -r ".unlockToken" | tr -d '\r'`
+    BAMBOO_LOCK_TOKEN=$(echo ${BAMBOO_LOCK_RESULT} | jq -r ".unlockToken" | tr -d '\r')
     if [ -z "${BAMBOO_LOCK_TOKEN}" ]; then
         bail "Unable to find lock token. Result was '$BAMBOO_LOCK_RESULT'"
     fi
@@ -23,7 +23,7 @@ function bamboo_lock {
 }
 
 function bamboo_unlock {
-    BAMBOO_UNLOCK_RESULT=`curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -X DELETE -H "Accept: application/json" -H "Content-type: application/json" "${BAMBOO_URL}/mvc/maintenance/lock?token=${BAMBOO_LOCK_TOKEN}"`
+    BAMBOO_UNLOCK_RESULT=$(curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -X DELETE -H "Accept: application/json" -H "Content-type: application/json" "${BAMBOO_URL}/mvc/maintenance/lock?token=${BAMBOO_LOCK_TOKEN}")
     if [ $? != 0 ]; then
         bail "Unable to unlock instance with lock ${BAMBOO_LOCK_TOKEN}"
     fi

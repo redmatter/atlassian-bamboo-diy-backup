@@ -10,7 +10,7 @@ if [ -z "${AWS_REGION}" ] || [ "${AWS_REGION}" == null ]; then
 fi
 
 if [ -z "${AWS_ACCESS_KEY_ID}" ] ||  [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
-    AWS_INSTANCE_ROLE=`curl ${CURL_OPTIONS} http://169.254.169.254/latest/meta-data/iam/security-credentials/`
+    AWS_INSTANCE_ROLE=$(curl ${CURL_OPTIONS} http://169.254.169.254/latest/meta-data/iam/security-credentials/)
     if [ -z "${AWS_INSTANCE_ROLE}" ]; then
         error "Could not find the necessary credentials to run backup"
         error "We recommend launching the instance with an appropiate IAM role"
@@ -130,7 +130,7 @@ function restore_from_snapshot {
     local VOLUME_ID=
     create_volume "${SNAPSHOT_ID}" "${VOLUME_TYPE}" "${PROVISIONED_IOPS}" VOLUME_ID
 
-    local INSTANCE_ID=`curl ${CURL_OPTIONS} http://169.254.169.254/latest/meta-data/instance-id`
+    local INSTANCE_ID=$(curl ${CURL_OPTIONS} http://169.254.169.254/latest/meta-data/instance-id)
 
     attach_volume "${VOLUME_ID}" "${DEVICE_NAME}" "${INSTANCE_ID}"
 
@@ -156,7 +156,7 @@ function validate_ebs_snapshot {
 
 function validate_device_name {
     local DEVICE_NAME="${1}"
-    local INSTANCE_ID=`curl ${CURL_OPTIONS} http://169.254.169.254/latest/meta-data/instance-id`
+    local INSTANCE_ID=$(curl ${CURL_OPTIONS} http://169.254.169.254/latest/meta-data/instance-id)
 
     # If there's a volume taking the provided DEVICE_NAME it must be unmounted and detached
     info "Checking for existing volumes using device name ${DEVICE_NAME}"
@@ -226,7 +226,7 @@ function restore_rds_instance {
 function validate_ebs_volume {
     local DEVICE_NAME="${1}"
     local __RETURN=$2
-    local INSTANCE_ID=`curl ${CURL_OPTIONS} http://169.254.169.254/latest/meta-data/instance-id`
+    local INSTANCE_ID=$(curl ${CURL_OPTIONS} http://169.254.169.254/latest/meta-data/instance-id)
 
     info "Looking up volume for device name ${DEVICE_NAME}"
     local VOLUME_ID="$(aws ec2 describe-volumes --filter Name=attachment.instance-id,Values=${INSTANCE_ID} Name=attachment.device,Values=${DEVICE_NAME} | jq -r '.Volumes[0].VolumeId')"
@@ -252,7 +252,7 @@ function validate_rds_instance_id {
 function validate_rds_snapshot {
     local SNAPSHOT_TAG="$1"
 
-    local SNAPSHOT_ID="`aws rds describe-db-snapshots --db-snapshot-identifier \"${SNAPSHOT_TAG}\" | jq -r '.DBSnapshots[0]?.DBSnapshotIdentifier'`"
+    local SNAPSHOT_ID=$(aws rds describe-db-snapshots --db-snapshot-identifier \"${SNAPSHOT_TAG}\" | jq -r '.DBSnapshots[0]?.DBSnapshotIdentifier')
     if [ -z "${SNAPSHOT_ID}" ] || [ "${SNAPSHOT_ID}" == null ]; then
          error "Could not find RDS snapshot for tag ${SNAPSHOT_TAG}"
 
