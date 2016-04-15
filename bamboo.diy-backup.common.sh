@@ -3,84 +3,32 @@
 check_command "curl"
 check_command "jq"
 
-BITBUCKET_HTTP_AUTH="-u ${BITBUCKET_BACKUP_USER}:${BITBUCKET_BACKUP_PASS}"
+BAMBOO_HTTP_AUTH="-u ${BAMBOO_BACKUP_USER}:${BAMBOO_BACKUP_PASS}"
 
 # The name of the product
-PRODUCT=Bitbucket
+PRODUCT=Bamboo
 
-function bitbucket_lock {
-    BITBUCKET_LOCK_RESULT=`curl ${CURL_OPTIONS} ${BITBUCKET_HTTP_AUTH} -X POST -H "Content-type: application/json" "${BITBUCKET_URL}/mvc/maintenance/lock"`
-    if [ -z "${BITBUCKET_LOCK_RESULT}" ]; then
-        bail "Locking this Bitbucket instance failed"
+function bamboo_lock {
+    BAMBOO_LOCK_RESULT=`curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -X POST -H "Content-type: application/json" "${BAMBOO_URL}/mvc/maintenance/lock"`
+    if [ -z "${BAMBOO_LOCK_RESULT}" ]; then
+        bail "Locking this ${PRODUCT} instance failed"
     fi
 
-    BITBUCKET_LOCK_TOKEN=`echo ${BITBUCKET_LOCK_RESULT} | jq -r ".unlockToken" | tr -d '\r'`
-    if [ -z "${BITBUCKET_LOCK_TOKEN}" ]; then
-        bail "Unable to find lock token. Result was '$BITBUCKET_LOCK_RESULT'"
+    BAMBOO_LOCK_TOKEN=`echo ${BAMBOO_LOCK_RESULT} | jq -r ".unlockToken" | tr -d '\r'`
+    if [ -z "${BAMBOO_LOCK_TOKEN}" ]; then
+        bail "Unable to find lock token. Result was '$BAMBOO_LOCK_RESULT'"
     fi
 
-    info "locked with '$BITBUCKET_LOCK_TOKEN'"
+    info "locked with '$BAMBOO_LOCK_TOKEN'"
 }
 
-function bitbucket_backup_start {
-    BITBUCKET_BACKUP_RESULT=`curl ${CURL_OPTIONS} ${BITBUCKET_HTTP_AUTH} -X POST -H "X-Atlassian-Maintenance-Token: ${BITBUCKET_LOCK_TOKEN}" -H "Accept: application/json" -H "Content-type: application/json" "${BITBUCKET_URL}/mvc/admin/backups?external=true"`
-    if [ -z "${BITBUCKET_BACKUP_RESULT}" ]; then
-        bail "Entering backup mode failed"
-    fi
-
-    BITBUCKET_BACKUP_TOKEN=`echo ${BITBUCKET_BACKUP_RESULT} | jq -r ".cancelToken" | tr -d '\r'`
-    if [ -z "${BITBUCKET_BACKUP_TOKEN}" ]; then
-        bail "Unable to find backup token. Result was '${BITBUCKET_BACKUP_RESULT}'"
-    fi
-
-    info "backup started with '${BITBUCKET_BACKUP_TOKEN}'"
-}
-
-function bitbucket_backup_wait {
-    BITBUCKET_PROGRESS_DB_STATE="AVAILABLE"
-    BITBUCKET_PROGRESS_SCM_STATE="AVAILABLE"
-
-    print -n "[${BITBUCKET_URL}]  INFO: Waiting for DRAINED state"
-    while [ "${BITBUCKET_PROGRESS_DB_STATE}_${BITBUCKET_PROGRESS_SCM_STATE}" != "DRAINED_DRAINED" ]; do
-        print -n "."
-
-        BITBUCKET_PROGRESS_RESULT=`curl ${CURL_OPTIONS} ${BITBUCKET_HTTP_AUTH} -X GET -H "X-Atlassian-Maintenance-Token: ${BITBUCKET_LOCK_TOKEN}" -H "Accept: application/json" -H "Content-type: application/json" "${BITBUCKET_URL}/mvc/maintenance"`
-        if [ -z "${BITBUCKET_PROGRESS_RESULT}" ]; then
-            bail "[${BITBUCKET_URL}] ERROR: Unable to check for backup progress"
-        fi
-
-        BITBUCKET_PROGRESS_DB_STATE=`echo ${BITBUCKET_PROGRESS_RESULT} | jq -r '.["db-state"]' | tr -d '\r'`
-        BITBUCKET_PROGRESS_SCM_STATE=`echo ${BITBUCKET_PROGRESS_RESULT} | jq -r '.["scm-state"]' | tr -d '\r'`
-        BITBUCKET_PROGRESS_STATE=`echo ${BITBUCKET_PROGRESS_RESULT} | jq -r '.task.state' | tr -d '\r'`
-
-        if [ "${BITBUCKET_PROGRESS_STATE}" != "RUNNING" ]; then
-            error "Unable to start backup, try unlocking"
-            bitbucket_unlock
-            bail "Failed to start backup"
-        fi
-    done
-
-    print " done"
-    info "db state '${BITBUCKET_PROGRESS_DB_STATE}'"
-    info "scm state '${BITBUCKET_PROGRESS_SCM_STATE}'"
-}
-
-function bitbucket_backup_progress {
-    BITBUCKET_REPORT_RESULT=`curl ${CURL_OPTIONS} ${BITBUCKET_HTTP_AUTH} -X POST -H "Accept: application/json" -H "Content-type: application/json" "${BITBUCKET_URL}/mvc/admin/backups/progress/client?token=${BITBUCKET_LOCK_TOKEN}&percentage=$1"`
+function bamboo_unlock {
+    BAMBOO_UNLOCK_RESULT=`curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -X DELETE -H "Accept: application/json" -H "Content-type: application/json" "${BAMBOO_URL}/mvc/maintenance/lock?token=${BAMBOO_LOCK_TOKEN}"`
     if [ $? != 0 ]; then
-        bail "Unable to update backup progress"
+        bail "Unable to unlock instance with lock ${BAMBOO_LOCK_TOKEN}"
     fi
 
-    info "Backup progress updated to $1"
-}
-
-function bitbucket_unlock {
-    BITBUCKET_UNLOCK_RESULT=`curl ${CURL_OPTIONS} ${BITBUCKET_HTTP_AUTH} -X DELETE -H "Accept: application/json" -H "Content-type: application/json" "${BITBUCKET_URL}/mvc/maintenance/lock?token=${BITBUCKET_LOCK_TOKEN}"`
-    if [ $? != 0 ]; then
-        bail "Unable to unlock instance with lock ${BITBUCKET_LOCK_TOKEN}"
-    fi
-
-    info "Bitbucket instance unlocked"
+    info "${PRODUCT} instance unlocked"
 }
 
 function freeze_mount_point {
@@ -123,7 +71,7 @@ function check_mount_point {
     mountpoint -q "${MOUNT_POINT}"
     if [ $? == 0 ]; then
         error "The directory mount point ${MOUNT_POINT} appears to be taken"
-        bail "Please stop Bitbucket. Stop PostgreSQL if it is running. Unmount the device and detach the volume"
+        bail "Please stop ${PRODUCT}. Stop PostgreSQL if it is running. Unmount the device and detach the volume"
     fi
 }
 
@@ -138,8 +86,8 @@ function cleanup_locks {
     shopt -s globstar
 
     # Remove lock files in the repositories
-    sudo -u ${BITBUCKET_UID} rm -f ${HOME_DIRECTORY}/shared/data/repositories/*/{HEAD,config,index,gc,packed-refs,stash-packed-refs}.{pid,lock}
-    sudo -u ${BITBUCKET_UID} rm -f ${HOME_DIRECTORY}/shared/data/repositories/*/refs/**/*.lock
-    sudo -u ${BITBUCKET_UID} rm -f ${HOME_DIRECTORY}/shared/data/repositories/*/stash-refs/**/*.lock
-    sudo -u ${BITBUCKET_UID} rm -f ${HOME_DIRECTORY}/shared/data/repositories/*/logs/**/*.lock
+    sudo -u ${BAMBOO_UID} rm -f ${HOME_DIRECTORY}/shared/data/repositories/*/{HEAD,config,index,gc,packed-refs,stash-packed-refs}.{pid,lock}
+    sudo -u ${BAMBOO_UID} rm -f ${HOME_DIRECTORY}/shared/data/repositories/*/refs/**/*.lock
+    sudo -u ${BAMBOO_UID} rm -f ${HOME_DIRECTORY}/shared/data/repositories/*/stash-refs/**/*.lock
+    sudo -u ${BAMBOO_UID} rm -f ${HOME_DIRECTORY}/shared/data/repositories/*/logs/**/*.lock
 }

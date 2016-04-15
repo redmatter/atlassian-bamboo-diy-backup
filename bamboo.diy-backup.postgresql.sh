@@ -32,30 +32,30 @@ if [[ -z ${POSTGRES_PORT} ]]; then
     POSTGRES_PORT=5432
 fi
 
-function bitbucket_prepare_db {
-    info "Prepared backup of DB ${BITBUCKET_DB} in ${BITBUCKET_BACKUP_DB}"
+function bamboo_prepare_db {
+    info "Prepared backup of DB ${BAMBOO_DB} in ${BAMBOO_BACKUP_DB}"
 }
 
-function bitbucket_backup_db {
-    rm -r ${BITBUCKET_BACKUP_DB}
-    pg_dump ${PG_USER} ${PG_HOST} --port=${POSTGRES_PORT} ${PG_PARALLEL} -Fd ${BITBUCKET_DB} ${PG_SNAPSHOT_OPT} -f ${BITBUCKET_BACKUP_DB}
+function bamboo_backup_db {
+    rm -r ${BAMBOO_BACKUP_DB}
+    pg_dump ${PG_USER} ${PG_HOST} --port=${POSTGRES_PORT} ${PG_PARALLEL} -Fd ${BAMBOO_DB} ${PG_SNAPSHOT_OPT} -f ${BAMBOO_BACKUP_DB}
     if [ $? != 0 ]; then
-        bail "Unable to backup ${BITBUCKET_DB} to ${BITBUCKET_BACKUP_DB}"
+        bail "Unable to backup ${BAMBOO_DB} to ${BAMBOO_BACKUP_DB}"
     fi
-    info "Performed backup of DB ${BITBUCKET_DB} in ${BITBUCKET_BACKUP_DB}"
+    info "Performed backup of DB ${BAMBOO_DB} in ${BAMBOO_BACKUP_DB}"
 }
 
-function bitbucket_bail_if_db_exists {
-    psql ${PG_USER} ${PG_HOST} --port=${POSTGRES_PORT} -d ${BITBUCKET_DB} -c '' > /dev/null 2>&1
+function bamboo_bail_if_db_exists {
+    psql ${PG_USER} ${PG_HOST} --port=${POSTGRES_PORT} -d ${BAMBOO_DB} -c '' > /dev/null 2>&1
     if [ $? = 0 ]; then
-        bail "Cannot restore over existing database ${BITBUCKET_DB}. Try dropdb ${BITBUCKET_DB} first."
+        bail "Cannot restore over existing database ${BAMBOO_DB}. Try dropdb ${BAMBOO_DB} first."
     fi
 }
 
-function bitbucket_restore_db {
-    pg_restore ${PG_USER} ${PG_HOST} --port=${POSTGRES_PORT} -d postgres -C -Fd ${PG_PARALLEL} ${BITBUCKET_RESTORE_DB}
+function bamboo_restore_db {
+    pg_restore ${PG_USER} ${PG_HOST} --port=${POSTGRES_PORT} -d postgres -C -Fd ${PG_PARALLEL} ${BAMBOO_RESTORE_DB}
     if [ $? != 0 ]; then
-        bail "Unable to restore ${BITBUCKET_RESTORE_DB} to ${BITBUCKET_DB}"
+        bail "Unable to restore ${BAMBOO_RESTORE_DB} to ${BAMBOO_DB}"
     fi
-    info "Performed restore of ${BITBUCKET_RESTORE_DB} to DB ${BITBUCKET_DB}"
+    info "Performed restore of ${BAMBOO_RESTORE_DB} to DB ${BAMBOO_DB}"
 }

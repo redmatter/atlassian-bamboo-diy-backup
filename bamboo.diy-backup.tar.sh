@@ -2,22 +2,22 @@
 
 check_command "tar"
 
-function bitbucket_backup_archive {
-    mkdir -p ${BITBUCKET_BACKUP_ARCHIVE_ROOT}
-    BITBUCKET_BACKUP_ARCHIVE_NAME=`perl -we 'use Time::Piece; my $sydTime = localtime; print "bitbucket-", $sydTime->strftime("%Y%m%d-%H%M%S-"), substr($sydTime->epoch, -3), ".tar.gz"'`
+function bamboo_backup_archive {
+    mkdir -p ${BAMBOO_BACKUP_ARCHIVE_ROOT}
+    BAMBOO_BACKUP_ARCHIVE_NAME=`perl -we 'use Time::Piece; my $sydTime = localtime; print "bamboo-", $sydTime->strftime("%Y%m%d-%H%M%S-"), substr($sydTime->epoch, -3), ".tar.gz"'`
 
-    info "Archiving ${BITBUCKET_BACKUP_ROOT} into ${BITBUCKET_BACKUP_ARCHIVE_ROOT}/${BITBUCKET_BACKUP_ARCHIVE_NAME}"
-    tar -czf ${BITBUCKET_BACKUP_ARCHIVE_ROOT}/${BITBUCKET_BACKUP_ARCHIVE_NAME} -C ${BITBUCKET_BACKUP_ROOT} .
-    info "Archived ${BITBUCKET_BACKUP_ROOT} into ${BITBUCKET_BACKUP_ARCHIVE_ROOT}/${BITBUCKET_BACKUP_ARCHIVE_NAME}"
+    info "Archiving ${BAMBOO_BACKUP_ROOT} into ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME}"
+    tar -czf ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME} -C ${BAMBOO_BACKUP_ROOT} .
+    info "Archived ${BAMBOO_BACKUP_ROOT} into ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME}"
 }
 
-function bitbucket_restore_archive {
-    if [ -f ${BITBUCKET_BACKUP_ARCHIVE_NAME} ]; then
-        BITBUCKET_BACKUP_ARCHIVE_NAME=${BITBUCKET_BACKUP_ARCHIVE_NAME}
+function bamboo_restore_archive {
+    if [ -f ${BAMBOO_BACKUP_ARCHIVE_NAME} ]; then
+        BAMBOO_BACKUP_ARCHIVE_NAME=${BAMBOO_BACKUP_ARCHIVE_NAME}
     else
-        BITBUCKET_BACKUP_ARCHIVE_NAME=${BITBUCKET_BACKUP_ARCHIVE_ROOT}/${BITBUCKET_BACKUP_ARCHIVE_NAME}
+        BAMBOO_BACKUP_ARCHIVE_NAME=${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME}
     fi
-    tar -xzf ${BITBUCKET_BACKUP_ARCHIVE_NAME} -C ${BITBUCKET_RESTORE_ROOT}
+    tar -xzf ${BAMBOO_BACKUP_ARCHIVE_NAME} -C ${BAMBOO_RESTORE_ROOT}
 
-    info "Extracted ${BITBUCKET_BACKUP_ARCHIVE_NAME} into ${BITBUCKET_RESTORE_ROOT}"
+    info "Extracted ${BAMBOO_BACKUP_ARCHIVE_NAME} into ${BAMBOO_RESTORE_ROOT}"
 }
