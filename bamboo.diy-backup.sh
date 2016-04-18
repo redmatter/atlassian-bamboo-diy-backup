@@ -56,21 +56,17 @@ source ${SCRIPT_DIR}/bamboo.diy-backup.${BACKUP_ARCHIVE_TYPE}.sh
 bamboo_prepare_db
 bamboo_prepare_home
 
-# Locking the bamboo instance, starting an external backup and waiting for instance readiness
-bamboo_lock
-bamboo_backup_start
-bamboo_backup_wait
+# Pause the bamboo instance
+bamboo_pause
 
 # Backing up the database and reporting 50% progress
 bamboo_backup_db
-bamboo_backup_progress 50
 
 # Backing up the filesystem and reporting 100% progress
 bamboo_backup_home
-bamboo_backup_progress 100
 
-# Unlocking the bamboo instance
-bamboo_unlock
+# Resume the bamboo instance
+bamboo_resume
 
 # Making an archive for this backup
 bamboo_backup_archive

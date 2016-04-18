@@ -3,8 +3,8 @@
 check_command "rsync"
 
 function bamboo_perform_rsync {
-    for repo_id in ${BAMBOO_BACKUP_EXCLUDE_REPOS[@]}; do
-      RSYNC_EXCLUDE_REPOS="${RSYNC_EXCLUDE_REPOS} --exclude=/shared/data/repositories/${repo_id}"
+    for exclude in ${BAMBOO_BACKUP_EXCLUDE}; do
+      RSYNC_EXCLUDE="${RSYNC_EXCLUDE} --exclude=${exclude}"
     done
 
     RSYNC_QUIET=-q
@@ -13,7 +13,12 @@ function bamboo_perform_rsync {
     fi
 
     mkdir -p ${BAMBOO_BACKUP_HOME}
-    rsync -avh ${RSYNC_QUIET} --delete --delete-excluded --exclude=/caches/ --exclude=/shared/data/db.* --exclude=/shared/search/data/ --exclude=/export/ --exclude=/log/ --exclude=/plugins/.*/ --exclude=/tmp --exclude=/.lock --exclude=/shared/.lock ${RSYNC_EXCLUDE_REPOS} ${BAMBOO_HOME} ${BAMBOO_BACKUP_HOME}
+    rsync -avh ${RSYNC_QUIET} --numeric-ids --sparse \
+        --delete --delete-excluded \
+        --exclude=temp --exclude=exports \
+        --exclude=build-dir --exclude=build_logs --exclude=artifacts \
+        ${RSYNC_EXCLUDE} \
+        ${BAMBOO_HOME} ${BAMBOO_BACKUP_HOME}
     if [ $? != 0 ]; then
         bail "Unable to rsync from ${BAMBOO_HOME} to ${BAMBOO_BACKUP_HOME}"
     fi

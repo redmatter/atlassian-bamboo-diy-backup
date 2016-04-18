@@ -1,3 +1,6 @@
+.project
+.buildpath
 .idea
-bitbucket.diy-backup.vars.sh
-bitbucket.diy-aws-backup.vars.sh
+backups
+bamboo.diy-backup.vars.sh
+bamboo.diy-aws-backup.vars.sh

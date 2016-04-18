@@ -7,7 +7,7 @@
 CURL_OPTIONS="-L -s -f"
 
 # Which database backup script to use (ex: mssql, postgresql, mysql, ebs-collocated, rds)
-BACKUP_DATABASE_TYPE=postgresql
+BACKUP_DATABASE_TYPE=mysql
 
 # Which filesystem backup script to use (ex: rsync, ebs-home)
 BACKUP_HOME_TYPE=rsync
@@ -46,9 +46,10 @@ BAMBOO_BACKUP_HOME=${BAMBOO_BACKUP_ROOT}/bamboo-home/
 # The path to where the backup archives are stored
 BAMBOO_BACKUP_ARCHIVE_ROOT=
 
-# List of repo IDs which should be excluded from the backup
-# It should be space separated: (2 5 88)
-BAMBOO_BACKUP_EXCLUDE_REPOS=()
+# Space delimited list of files and folders to exclude from $BAMBOO_HOME
+# example BAMBOO_BACKUP_EXCLUDE="secret.txt temp"
+# For advanced uses, use RSYNC_EXCLUDE variable
+BAMBOO_BACKUP_EXCLUDE=
 
 # PostgreSQL options
 POSTGRES_HOST=
