@@ -3,7 +3,7 @@
 check_command "rsync"
 
 function bamboo_perform_rsync {
-    for exclude in ${BAMBOO_BACKUP_EXCLUDE}; do
+    for exclude in ${BAMBOO_BACKUP_EXCLUDE:-}; do
       RSYNC_EXCLUDE="${RSYNC_EXCLUDE} --exclude=${exclude}"
     done
 
@@ -17,7 +17,7 @@ function bamboo_perform_rsync {
         --delete --delete-excluded \
         --exclude=temp --exclude=exports \
         --exclude=build-dir --exclude=build_logs --exclude=artifacts \
-        ${RSYNC_EXCLUDE} \
+        ${RSYNC_EXCLUDE:-} \
         ${BAMBOO_HOME} ${BAMBOO_BACKUP_HOME}
     if [ $? != 0 ]; then
         bail "Unable to rsync from ${BAMBOO_HOME} to ${BAMBOO_BACKUP_HOME}"
