@@ -1,8 +1,8 @@
 #!/bin/bash
 
 function error {
-    echo "[${BITBUCKET_URL}] ERROR: $*"
-    hc_announce "[${BITBUCKET_URL}] ERROR: $*" "red" 1
+    echo "[${BAMBOO_URL}] ERROR: $*"
+    hc_announce "[${BAMBOO_URL}] ERROR: $*" "red" 1
 }
 
 function bail {
@@ -11,19 +11,19 @@ function bail {
 }
 
 function info {
-    if [ "${BITBUCKET_VERBOSE_BACKUP}" == "TRUE" ]; then
-        echo "[${BITBUCKET_URL}]  INFO: $*"
-        hc_announce "[${BITBUCKET_URL}]  INFO: $*" "gray"
+    if [ "${BAMBOO_VERBOSE_BACKUP}" == "TRUE" ]; then
+        echo "[${BAMBOO_URL}]  INFO: $*"
+        hc_announce "[${BAMBOO_URL}]  INFO: $*" "gray"
     fi
 }
 
 function success {
-    echo "[${BITBUCKET_URL}]  SUCC: $*"
-    hc_announce "[${BITBUCKET_URL}]  SUCC: $*" "green"
+    echo "[${BAMBOO_URL}]  SUCC: $*"
+    hc_announce "[${BAMBOO_URL}]  SUCC: $*" "green"
 }
 
 function print {
-    if [ "${BITBUCKET_VERBOSE_BACKUP}" == "TRUE" ]; then
+    if [ "${BAMBOO_VERBOSE_BACKUP}" == "TRUE" ]; then
         echo "$@"
     fi
 }
@@ -55,6 +55,6 @@ function hc_announce {
         NOTIFY="true"
     fi
 
-    local MESSAGE=`echo "$1" | sed -e 's|"|\\\"|g'`
+    local MESSAGE=$(echo "$1" | sed -e 's|"|\\\"|g')
     curl -s -S -X POST -H "Content-Type: application/json" -d "{\"message\":\"${MESSAGE}\",\"color\":\"${COLOR}\",\"notify\":${NOTIFY}}" "${HIPCHAT_URL}/v2/room/${HIPCHAT_ROOM}/notification?auth_token=${HIPCHAT_TOKEN}"
 }
