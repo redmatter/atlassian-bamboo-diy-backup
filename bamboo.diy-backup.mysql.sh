@@ -15,6 +15,7 @@ function bamboo_prepare_db {
 
 function bamboo_backup_db {
     rm -r ${BAMBOO_BACKUP_DB}
+    mkdir -p ${BAMBOO_BACKUP_DB}
     mysqldump ${MYSQL_HOST_CMD} ${MYSQL_BACKUP_OPTIONS} -u ${MYSQL_USERNAME} -p${MYSQL_PASSWORD} --databases ${BAMBOO_DB} > ${BAMBOO_BACKUP_DB}/database.sql
     if [ $? != 0 ]; then
         bail "Unable to backup ${BAMBOO_DB} to ${BAMBOO_BACKUP_DB}"
