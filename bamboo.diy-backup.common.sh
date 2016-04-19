@@ -11,16 +11,16 @@ BAMBOO_HTTP_AUTH="-u ${BAMBOO_BACKUP_USER}:${BAMBOO_BACKUP_PASS}"
 PRODUCT=Bamboo
 
 function bamboo_pause {
-    curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -X POST -H "Accept:application/json" -H "Content-type: application/json" "${BAMBOO_URL}/rest/api/latest/server/pause?os_authType=basic"
+    curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -X POST -H "Accept: application/json" -H "Content-type: application/json" "${BAMBOO_URL}/rest/api/latest/server/pause?os_authType=basic"
     if [ $? != 0 ]; then
         bail "Pausing this ${PRODUCT} instance failed"
     fi
 
     # Check the server status to see if its been paused
     # Expected result {"state":"PAUSED","reindexInProgress":false}
-    BAMBOO_STATUS_RESULT=$(curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -X POST -H "Accept:application/json" -H "Content-type: application/json" "${BAMBOO_URL}/rest/api/latest/server?os_authType=basic")
+    BAMBOO_STATUS_RESULT=$(curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -X POST -H "Accept: application/json" -H "Content-type: application/json" "${BAMBOO_URL}/rest/api/latest/server?os_authType=basic")
 
-    local wait_till=$(( $(date +%s) + "${BAMBOO_PAUSE_WAIT_TIMEOUT}" ))
+    local wait_till=$(( $(date +%s) + ${BAMBOO_PAUSE_WAIT_TIMEOUT} ))
     while [ -z "${BAMBOO_STATUS_RESULT}" ] || \
         [ "$(echo ${BAMBOO_STATUS_RESULT} | jq -r ".state" | tr -d '\r')" != 'PAUSED' ] || \
         [ "$(echo ${BAMBOO_STATUS_RESULT} | jq -r ".reindexInProgress" | tr -d '\r')" != 'false' ];
