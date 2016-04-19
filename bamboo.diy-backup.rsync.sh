@@ -4,7 +4,7 @@ check_command "rsync"
 
 function bamboo_perform_rsync {
     for exclude in ${BAMBOO_BACKUP_EXCLUDE:-}; do
-      RSYNC_EXCLUDE="${RSYNC_EXCLUDE} --exclude=${exclude}"
+      RSYNC_EXCLUDE="${RSYNC_EXCLUDE:-} --exclude=${exclude}"
     done
 
     RSYNC_QUIET=-q
