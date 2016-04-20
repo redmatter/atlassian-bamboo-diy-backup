@@ -54,10 +54,10 @@ bamboo_prepare_db
 # Pause the bamboo instance
 bamboo_pause
 
-# Backing up the database and reporting 50% progress
+# Backing up the database
 bamboo_backup_db
 
-# Backing up the filesystem and reporting 100% progress
+# Backing up the filesystem
 bamboo_backup_home
 
 # Resume the bamboo instance
