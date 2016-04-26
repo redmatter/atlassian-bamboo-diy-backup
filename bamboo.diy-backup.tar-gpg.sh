@@ -41,10 +41,8 @@ function bamboo_backup_archive {
             gpg-zip --encrypt --recipient ${BAMBOO_BACKUP_GPG_RECIPIENT} \
                 --output ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME} .
         else
-            echo "${BAMBOO_BACKUP_GPG_PASSPHRASE}" | gpg-zip --encrypt --symmetric \
-                --output ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME} \
-                --gpg-args "--passphrase-fd 0" \
-                .
+            tar czf - . | gpg --symmetric --passphrase-file <(echo -n "${BAMBOO_BACKUP_GPG_PASSPHRASE}") \
+                --output ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME}
         fi
     ) && 
         info "Archived ${BAMBOO_BACKUP_ROOT} into ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME}" ||
