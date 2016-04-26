@@ -62,8 +62,8 @@ function bamboo_restore_archive {
     if [ "${BAMBOO_BACKUP_GPG_MODE}" = asymmetric ]; then
         gpg-zip --tar-args "-C ${BAMBOO_RESTORE_ROOT}" --decrypt ${BAMBOO_BACKUP_ARCHIVE_NAME}
     else
-        echo "${BAMBOO_BACKUP_GPG_PASSPHRASE}" | gpg-zip --decrypt --tar-args "-C ${BAMBOO_RESTORE_ROOT}" \
-            --gpg-args "--passphrase-fd 0" \
+        gpg-zip --decrypt --tar-args "-z -C ${BAMBOO_RESTORE_ROOT}" \
+            --gpg-args "--passphrase-file "<(echo -n "${BAMBOO_BACKUP_GPG_PASSPHRASE}") \
             ${BAMBOO_BACKUP_ARCHIVE_NAME}
     fi
 
