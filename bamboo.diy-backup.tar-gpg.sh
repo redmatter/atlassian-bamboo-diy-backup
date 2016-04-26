@@ -46,8 +46,9 @@ function bamboo_backup_archive {
                 --gpg-args "--passphrase-fd 0" \
                 .
         fi
-    ) && info "Archived ${BAMBOO_BACKUP_ROOT} into ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME}"
-    || bail "Archiving into ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME} failed"
+    ) && 
+        info "Archived ${BAMBOO_BACKUP_ROOT} into ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME}" ||
+        bail "Archiving into ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME} failed"
 }
 
 function bamboo_restore_archive {
