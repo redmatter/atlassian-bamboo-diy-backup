@@ -41,8 +41,9 @@ function bamboo_backup_archive {
             gpg-zip --encrypt --recipient ${BAMBOO_BACKUP_GPG_RECIPIENT} \
                 --output ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME} .
         else
-            tar czf - . | gpg --symmetric --passphrase-file <(echo -n "${BAMBOO_BACKUP_GPG_PASSPHRASE}") \
-                --output ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME}
+            gpg-zip --symmetric --tar-args "-z" \
+                --gpg-args "--passphrase-file "<(echo -n "${BAMBOO_BACKUP_GPG_PASSPHRASE}") \
+                --output ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME} .
         fi
     ) && 
         info "Archived ${BAMBOO_BACKUP_ROOT} into ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME}" ||
@@ -62,7 +63,7 @@ function bamboo_restore_archive {
     if [ "${BAMBOO_BACKUP_GPG_MODE}" = asymmetric ]; then
         gpg-zip --tar-args "-C ${BAMBOO_RESTORE_ROOT}" --decrypt ${BAMBOO_BACKUP_ARCHIVE_NAME}
     else
-        gpg-zip --decrypt --tar-args "-z -C ${BAMBOO_RESTORE_ROOT}" \
+        gpg-zip --tar-args "-z -C ${BAMBOO_RESTORE_ROOT}" --decrypt \
             --gpg-args "--passphrase-file "<(echo -n "${BAMBOO_BACKUP_GPG_PASSPHRASE}") \
             ${BAMBOO_BACKUP_ARCHIVE_NAME}
     fi
