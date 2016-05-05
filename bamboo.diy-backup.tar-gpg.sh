@@ -42,7 +42,7 @@ function bamboo_backup_archive {
                 --output ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME} .
         else
             gpg-zip --symmetric --tar-args "-z" \
-                --gpg-args "--passphrase-file "<(echo -n "${BAMBOO_BACKUP_GPG_PASSPHRASE}") \
+                --gpg-args "--no-tty --passphrase-file "<(echo -n "${BAMBOO_BACKUP_GPG_PASSPHRASE}") \
                 --output ${BAMBOO_BACKUP_ARCHIVE_ROOT}/${BAMBOO_BACKUP_ARCHIVE_NAME} .
         fi
     ) && 
@@ -64,7 +64,7 @@ function bamboo_restore_archive {
         gpg-zip --tar-args "-C ${BAMBOO_RESTORE_ROOT}" --decrypt ${BAMBOO_BACKUP_ARCHIVE_NAME}
     else
         gpg-zip --tar-args "-z -C ${BAMBOO_RESTORE_ROOT}" --decrypt \
-            --gpg-args "--passphrase-file "<(echo -n "${BAMBOO_BACKUP_GPG_PASSPHRASE}") \
+            --gpg-args "--no-tty --passphrase-file "<(echo -n "${BAMBOO_BACKUP_GPG_PASSPHRASE}") \
             ${BAMBOO_BACKUP_ARCHIVE_NAME}
     fi
 
