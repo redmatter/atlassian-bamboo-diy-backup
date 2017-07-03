@@ -11,7 +11,7 @@ BAMBOO_HTTP_AUTH="-u ${BAMBOO_BACKUP_USER}:${BAMBOO_BACKUP_PASS}"
 PRODUCT=Bamboo
 
 function bamboo_is_paused {
-    local BAMBOO_STATUS_RESULT=$(curl ${CURL_OPTIONS} -H "Accept: application/json" -H "Content-type: application/json" "${BAMBOO_URL}/rest/api/latest/server")
+    local BAMBOO_STATUS_RESULT=$(curl ${CURL_OPTIONS} ${BAMBOO_HTTP_AUTH} -H "Accept: application/json" -H "Content-type: application/json" "${BAMBOO_URL}/rest/api/latest/server")
     [ -n "${BAMBOO_STATUS_RESULT}" ] && [ "$(echo ${BAMBOO_STATUS_RESULT} | jq -r ".state" | tr -d '\r')" = 'PAUSED' ]
 }
 
